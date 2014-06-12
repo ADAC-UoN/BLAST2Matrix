@@ -1,0 +1,73 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+blast2matrix.2.8.pl
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+RD Emes UCL London May 2005
+A perl script to Run a series of blastall searches using a fasta file supplied as a query against a series of fasta files
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+OVERVIEW
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Database subject files are formatted using Formatdb. 
+The user defines if the query and target databases are peptide or nucleotide and teh appropriate formatting and blast programme are run automatically.
+For ease of processing query sequences are renumbered (a-n) all data is stored in the lookup table query.README.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+INSTALATION
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+To run the script blast must be installed locally and the path to teh executables blastall and formatdb must be correct.
+Follow these steps to change path to executables
+1) After installation of BLAST executables type "which blastall" at the command line.
+eg : which blastall
+the response will be similar to /usr/local/bin/blastall
+2) Edit the blast2matrix script code at line 20 to match the path to blastall
+my $path = "/usr/local/bin/"; # CHANGE THIS TO PATH OF BLAST EXECS
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+INPUT
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+DB.TXT a list of all fasta files to be used as subjects
+DB TYPE P = peptide N = nucleotide
+QUERY FASTA fasta formatted query seqences
+QUERY TYPE P = peptide N = nucleotide
+Eval cut (1e-3 = 0.001, 1e3 = 1000)
+
+EXAMPLE: ./blast2matrix.pl db.txt N query.pep P 1e-3
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+OUTPUT
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1) MATRIX: matrix of presence/absence from a database depending on the eval cut off defined in blast parsing stage.
+
+2) blast_results
+directory containing all raw blast results files 
+named database_name.blastout
+
+3) parsed_results
+directory containing all parsed results
+named database_name.evalcutoff.parsed
+parsed data contains 
+Queryname, Evalue, BitScore, QuerySt, QueryEnd, Hitname, HitStart, HitEnd
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+OPTIONS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+RUN BLAST SEARCHES:
+if option Y : BLAST algorithm is run on the formatted databases the first time a search is run oyu must use this option.
+To compare the results of multiple E value cutoffs blast does not have to be run in later experiments.
+
+RUN SAFE MODE:
+As a crude attempt to overcome short regions producing a positive match use safe mode. In safe mode blast2matrix does not parse results if the length of a hsp or percent identities within the hsp fall below the user defined cutoffs.
+In version 2.6 or later the user is prompted to give a length cutoff (percentage of query length than the hsp must constitute) and a hsp percent identity cut off.
+The name of the matrix generated will contain these values L = length cutoff PID = percent identity cutoff. 
+eg if running a query with safe mode on L = 30 PID = 50 output would be named: query.pep.tblastn.1e2.L30.PID50.matrix 
+
+If safe mode is not run then output will be named as L =0 and PID = i.e. query.pep.tblastn.1e2.L0.PID0.matrix
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+WARNINIGS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+It is advisable to parse blast results multiple times with varying degrees of cutoff stringency depending on the evolutionary distance and conservation of the proteins of interest. 
+
+The blast results are not altered by the SAFE mode but are simply parsed differently therefore conclusions should be checked for the possibility of compositional bias and other factors affecting your results. 
